@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Epiciclos de Fourier</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #14171c;
+    --bg-panel: #1b1f26;
+    --bg-elevated: #232833;
+    --border: #2e3542;
+    --text: #e8eaed;
+    --text-dim: #9aa3b2;
+    --accent: #5aa9e6;
+    --accent-dim: #2f4a63;
+    --danger: #e15b64;
+    --ok: #5ec98f;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  [hidden] { display: none !important; }
+
+  /* Top bar */
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+  }
+  #topbar .brand { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+  #topbar .brand img { width: 22px; height: 22px; display: block; }
+  #topbar h1 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+  #topbar h1 span { color: var(--text-dim); font-weight: 400; }
+  #topbar .group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent-dim); border-color: var(--accent); }
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  select.example-select {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+  }
+
+  /* Main layout */
+  #main { flex: 1 1 auto; display: flex; min-height: 0; }
+  #stage { flex: 1 1 auto; position: relative; min-width: 0; background: #0d0f13; }
+  #stage.drop { outline: 2px dashed var(--accent); outline-offset: -10px; }
+  #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+  #hint {
+    position: absolute;
+    left: 12px;
+    top: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+  #sidebar {
+    width: 320px;
+    flex: 0 0 auto;
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-section h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-section h2 span { color: var(--text); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); margin: 0 0 4px 0; }
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 4px 0; cursor: pointer; }
+  .check-row input { accent-color: var(--accent); }
+  .empty-hint { color: var(--text-dim); font-size: 12.5px; line-height: 1.5; margin: 0; }
+  .meta-line { font-size: 11.5px; color: var(--text-dim); margin-top: 6px; line-height: 1.5; }
+  #thumb {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    image-rendering: pixelated;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .field-label { font-size: 11.5px; color: var(--text-dim); display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  th { text-align: right; color: var(--text-dim); font-weight: 400; padding: 3px 0; border-bottom: 1px solid var(--border); }
+  td { text-align: right; padding: 3px 0; border-bottom: 1px solid var(--border); }
+  th:first-child, td:first-child { text-align: left; }
+  tr:last-child td { border-bottom: none; }
+
+  .how p { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin: 0 0 8px 0; }
+  .how p:last-child { margin-bottom: 0; }
+  .how code { color: var(--text); font-size: 12px; }
+
+  /* Status bar */
+  #statusbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 6px 14px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  #statusbar .right { display: flex; gap: 14px; align-items: center; }
+
+  @media (max-width: 760px) {
+    body { overflow: auto; height: auto; }
+    #main { flex-direction: column; }
+    #stage { height: 70vh; flex: 0 0 auto; }
+    #sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); overflow: visible; }
+    #topbar h1 { white-space: normal; }
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <img src="assets/logo.svg" alt="Logo Epiciclos de Fourier">
+    <h1>Epiciclos de Fourier <span>· desenhe um contorno e veja círculos girando refazerem o traço</span></h1>
+  </div>
+  <div class="group">
+    <select id="exampleSelect" class="example-select" aria-label="Exemplos">
+      <option value="">Exemplos</option>
+      <option value="heart">Coração</option>
+      <option value="star">Estrela</option>
+      <option value="knot">Trifólio</option>
+      <option value="pi">Letra π</option>
+    </select>
+    <input id="fileInput" type="file" accept="image/*" style="display:none">
+    <button class="btn" id="fileBtn">Abrir imagem</button>
+  </div>
+  <div class="group">
+    <button class="btn primary" id="playBtn">Pausar</button>
+    <button class="btn" id="restartBtn">Recomeçar</button>
+    <button class="btn danger" id="clearBtn">Limpar</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="stage">
+    <canvas id="cv" aria-label="Área de desenho"></canvas>
+    <div id="hint">Clique e arraste para desenhar. Também dá para soltar uma imagem aqui.</div>
+  </div>
+
+  <div id="sidebar">
+    <div class="sidebar-section">
+      <h2>Termos <span id="termsOut">40</span></h2>
+      <input id="terms" type="range" min="1" max="300" value="40">
+      <div class="meta-line" id="energyLine"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>Velocidade <span id="speedOut">1.0×</span></h2>
+      <input id="speed" type="range" min="0.2" max="5" step="0.1" value="1">
+      <label class="check-row"><input id="showCircles" type="checkbox" checked> Mostrar círculos</label>
+      <label class="check-row"><input id="showGhost" type="checkbox" checked> Mostrar contorno original</label>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>Imagem</h2>
+      <p class="empty-hint" id="imgEmpty">Nenhuma imagem aberta. Use <b>Abrir imagem</b> ou solte um PNG, JPG ou SVG no quadro.</p>
+      <div id="imgTools" hidden>
+        <canvas id="thumb" width="160" height="120"></canvas>
+        <div class="field-label"><span>Limiar</span><span id="thrOut">auto</span></div>
+        <input id="thr" type="range" min="1" max="254" value="128">
+        <label class="check-row"><input id="inv" type="checkbox"> Inverter cores</label>
+        <div class="meta-line">Usa a borda externa da maior forma da imagem.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>Maiores coeficientes</h2>
+      <table>
+        <thead><tr><th>n</th><th>|c<sub>n</sub>|</th><th>fase</th></tr></thead>
+        <tbody id="coefs"></tbody>
+      </table>
+    </div>
+
+    <div class="sidebar-section how">
+      <h2>Como funciona</h2>
+      <p>Cada ponto (x, y) do contorno vira <code>z = x + iy</code>, e o contorno é refeito com 512 pontos à mesma distância.</p>
+      <p>A DFT calcula <code>c<sub>n</sub> = (1/N) Σ z<sub>k</sub> e<sup>−i2πnk/N</sup></code>. Cada coeficiente é um círculo: o módulo é o raio e o argumento é o ângulo de partida.</p>
+      <p>O círculo <code>n</code> dá <code>n</code> voltas por ciclo. Com um preso na ponta do outro, do maior para o menor, a ponta do último refaz o desenho.</p>
+    </div>
+  </div>
+</div>
+
+<div id="statusbar">
+  <div id="statusLeft">Pronto</div>
+  <div class="right">
+    <span id="visitorCounter">visitas: …</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const M = 512;
+  const COLORS = {
+    grid: '#1a1e25',
+    axis: '#232833',
+    ghost: '#4a5466',
+    circle: 'rgba(232, 234, 237, 0.16)',
+    vector: 'rgba(232, 234, 237, 0.5)',
+    trace: '#5aa9e6',
+    tip: '#e15b64',
+    pen: '#e8eaed',
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const cv = $('cv');
+  const ctx = cv.getContext('2d');
+  const stage = $('stage');
+
+  let W = 0, H = 0, S = 1;
+  let source = [];
+  let coeffs = [];
+  let totalEnergy = 1;
+  let terms = 40;
+  let speed = 1;
+  let t = 0;
+  let trace = [];
+  let playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let drawing = null;
+  let lastImage = null;
+  let autoThr = true;
+  const defaultHint = $('hint').textContent;
+
+  // Curve math
+  function dedupe(p) {
+    const out = [p[0]];
+    for (let i = 1; i < p.length; i++) {
+      const a = out[out.length - 1];
+      if (Math.hypot(p[i].x - a.x, p[i].y - a.y) > 1e-6) out.push(p[i]);
+    }
+    return out;
+  }
+
+  // Resample a closed curve to n points evenly spaced by arc length
+  function resample(p, n) {
+    const q = p.concat([p[0]]);
+    const L = [0];
+    for (let i = 1; i < q.length; i++) L.push(L[i - 1] + Math.hypot(q[i].x - q[i - 1].x, q[i].y - q[i - 1].y));
+    const total = L[L.length - 1];
+    const out = [];
+    let j = 0;
+    for (let k = 0; k < n; k++) {
+      const s = (k * total) / n;
+      while (j < q.length - 2 && L[j + 1] < s) j++;
+      const seg = L[j + 1] - L[j] || 1;
+      const u = (s - L[j]) / seg;
+      out.push({ x: q[j].x + (q[j + 1].x - q[j].x) * u, y: q[j].y + (q[j + 1].y - q[j].y) * u });
+    }
+    return out;
+  }
+
+  // Direct DFT; DC term first, the rest sorted by amplitude
+  function dft(z) {
+    const N = z.length;
+    const cosT = new Float64Array(N), sinT = new Float64Array(N);
+    for (let i = 0; i < N; i++) { cosT[i] = Math.cos((-2 * Math.PI * i) / N); sinT[i] = Math.sin((-2 * Math.PI * i) / N); }
+    const out = [];
+    for (let k = 0; k < N; k++) {
+      let re = 0, im = 0;
+      for (let n = 0; n < N; n++) {
+        const idx = (k * n) % N, c = cosT[idx], s = sinT[idx];
+        re += z[n].x * c - z[n].y * s;
+        im += z[n].x * s + z[n].y * c;
+      }
+      re /= N; im /= N;
+      out.push({ f: k <= N / 2 ? k : k - N, amp: Math.hypot(re, im), ph: Math.atan2(im, re) });
+    }
+    const dc = out.shift();
+    out.sort((a, b) => b.amp - a.amp);
+    return [dc, ...out];
+  }
+
+  function normalize(p) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const q of p) { minX = Math.min(minX, q.x); maxX = Math.max(maxX, q.x); minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y); }
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    const sc = 0.78 / Math.max(maxX - minX, maxY - minY, 1e-9);
+    return p.map((q) => ({ x: (q.x - cx) * sc, y: (q.y - cy) * sc }));
+  }
+
+  function setSource(points) {
+    const p = dedupe(points);
+    if (p.length < 3) return;
+    source = resample(p, M);
+    coeffs = dft(source);
+    totalEnergy = coeffs.reduce((s, c) => s + c.amp * c.amp, 0) || 1;
+    $('terms').max = Math.min(300, coeffs.length);
+    restart();
+    renderTable();
+  }
+
+  // Examples
+  function sampleCurve(fn, n = 600) {
+    const pts = [];
+    for (let i = 0; i < n; i++) pts.push(fn((i / n) * 2 * Math.PI));
+    return normalize(pts);
+  }
+  const examples = {
+    heart: () => sampleCurve((a) => ({ x: 16 * Math.sin(a) ** 3, y: -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) })),
+    star: () => {
+      const pts = [];
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? 0.4 : 1, a = -Math.PI / 2 + (i * Math.PI) / 5;
+        pts.push({ x: r * Math.cos(a), y: r * Math.sin(a) });
+      }
+      return normalize(pts);
+    },
+    knot: () => sampleCurve((a) => ({ x: Math.sin(a) + 2 * Math.sin(2 * a), y: Math.cos(a) - 2 * Math.cos(2 * a) })),
+    pi: () => normalize([
+      [0, 0], [10, 0], [10, 1.4], [7.6, 1.4], [7.6, 8.4], [8.6, 9.2], [9.8, 8.6], [10.2, 9.2], [8.8, 10.4], [7, 10.2], [6.2, 9], [6.2, 1.4],
+      [3.8, 1.4], [3.6, 6], [3, 8.6], [1.8, 10.2], [0.6, 10], [1.4, 8.4], [2.2, 5.6], [2.4, 1.4], [0.8, 1.4], [0, 2.2]
+    ].map(([x, y]) => ({ x, y }))),
+  };
+
+  $('exampleSelect').addEventListener('change', (e) => {
+    const k = e.target.value;
+    if (!examples[k]) return;
+    showImageTools(false);
+    $('hint').textContent = defaultHint;
+    setSource(examples[k]());
+    e.target.value = '';
+  });
+
+  // Image to contour
+  const work = document.createElement('canvas');
+  const wctx = work.getContext('2d', { willReadFrequently: true });
+
+  function otsu(gray) {
+    const hist = new Array(256).fill(0);
+    for (const g of gray) hist[g]++;
+    const total = gray.length;
+    let sum = 0;
+    for (let i = 0; i < 256; i++) sum += i * hist[i];
+    let sumB = 0, wB = 0, best = 0, thr = 128;
+    for (let i = 0; i < 256; i++) {
+      wB += hist[i]; if (!wB) continue;
+      const wF = total - wB; if (!wF) break;
+      sumB += i * hist[i];
+      const mB = sumB / wB, mF = (sum - sumB) / wF;
+      const v = wB * wF * (mB - mF) ** 2;
+      if (v > best) { best = v; thr = i; }
+    }
+    return thr;
+  }
+
+  function largestComponent(mask, w, h) {
+    const label = new Int32Array(w * h);
+    let bestId = 0, bestSize = 0, id = 0;
+    const stack = [];
+    for (let i = 0; i < w * h; i++) {
+      if (!mask[i] || label[i]) continue;
+      id++; let size = 0;
+      stack.push(i); label[i] = id;
+      while (stack.length) {
+        const p = stack.pop(); size++;
+        const x = p % w, y = (p / w) | 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const q = ny * w + nx;
+          if (mask[q] && !label[q]) { label[q] = id; stack.push(q); }
+        }
+      }
+      if (size > bestSize) { bestSize = size; bestId = id; }
+    }
+    const out = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) out[i] = label[i] === bestId && bestId ? 1 : 0;
+    return { mask: out, size: bestSize };
+  }
+
+  // Moore neighbor tracing
+  function traceContour(m, w, h) {
+    let s = -1;
+    for (let i = 0; i < w * h; i++) if (m[i]) { s = i; break; }
+    if (s < 0) return [];
+    const D = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+    let cx = s % w, cy = (s / w) | 0;
+    const sx = cx, sy = cy;
+    let back = 4;
+    const out = [{ x: cx, y: cy }];
+    for (let it = 0; it < 200000; it++) {
+      let found = false;
+      for (let i = 1; i <= 8; i++) {
+        const d = (back + i) % 8;
+        const nx = cx + D[d][0], ny = cy + D[d][1];
+        if (nx >= 0 && ny >= 0 && nx < w && ny < h && m[ny * w + nx]) {
+          const pd = (back + i - 1) % 8;
+          const px = cx + D[pd][0], py = cy + D[pd][1];
+          cx = nx; cy = ny;
+          back = D.findIndex((v) => v[0] === px - cx && v[1] === py - cy);
+          found = true;
+          break;
+        }
+      }
+      if (!found || (cx === sx && cy === sy)) break;
+      out.push({ x: cx, y: cy });
+    }
+    return out;
+  }
+
+  function processImage(img, fresh) {
+    const max = 360;
+    const iw = img.naturalWidth || img.width || 300, ih = img.naturalHeight || img.height || 300;
+    const sc = Math.min(max / iw, max / ih);
+    const w = Math.max(4, Math.round(iw * sc)) + 4, h = Math.max(4, Math.round(ih * sc)) + 4;
+    work.width = w; work.height = h;
+    wctx.fillStyle = '#fff';
+    wctx.fillRect(0, 0, w, h);
+    wctx.drawImage(img, 2, 2, w - 4, h - 4);
+    const data = wctx.getImageData(0, 0, w, h).data;
+    const gray = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) gray[i] = Math.round(0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2]);
+
+    if (autoThr) $('thr').value = otsu(gray);
+    const thr = +$('thr').value;
+    $('thrOut').textContent = autoThr ? `auto (${thr})` : thr;
+
+    const mask = new Uint8Array(w * h);
+    let fg = 0;
+    for (let i = 0; i < w * h; i++) { mask[i] = gray[i] < thr ? 1 : 0; fg += mask[i]; }
+    if (fresh) $('inv').checked = fg / (w * h) > 0.55;
+    if ($('inv').checked) for (let i = 0; i < w * h; i++) mask[i] ^= 1;
+    for (let x = 0; x < w; x++) { mask[x] = 0; mask[(h - 1) * w + x] = 0; }
+    for (let y = 0; y < h; y++) { mask[y * w] = 0; mask[y * w + w - 1] = 0; }
+
+    const comp = largestComponent(mask, w, h);
+    const contour = comp.size > 10 ? traceContour(comp.mask, w, h) : [];
+    drawThumb(comp.mask, w, h, contour);
+    if (contour.length < 8) { setStatus('Nenhuma forma encontrada. Mude o limiar ou inverta as cores.'); return; }
+    $('hint').textContent = defaultHint;
+    setSource(normalize(contour));
+  }
+
+  function drawThumb(mask, w, h, contour) {
+    const th = $('thumb');
+    th.width = w; th.height = h;
+    const tctx = th.getContext('2d');
+    tctx.fillStyle = '#14171c';
+    tctx.fillRect(0, 0, w, h);
+    tctx.fillStyle = '#2f4a63';
+    for (let i = 0; i < w * h; i++) if (mask[i]) tctx.fillRect(i % w, (i / w) | 0, 1, 1);
+    tctx.strokeStyle = '#e15b64';
+    tctx.lineWidth = 1.5;
+    tctx.beginPath();
+    contour.forEach((p, i) => (i ? tctx.lineTo(p.x, p.y) : tctx.moveTo(p.x, p.y)));
+    tctx.closePath();
+    tctx.stroke();
+  }
+
+  function showImageTools(on) {
+    $('imgTools').hidden = !on;
+    $('imgEmpty').hidden = on;
+  }
+
+  function loadFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setStatus('Esse arquivo não é uma imagem.'); return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { lastImage = img; autoThr = true; showImageTools(true); processImage(img, true); };
+    img.onerror = () => setStatus('Não deu para abrir essa imagem.');
+    img.src = url;
+  }
+
+  $('fileBtn').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', (e) => { loadFile(e.target.files[0]); e.target.value = ''; });
+  $('thr').addEventListener('input', () => { autoThr = false; if (lastImage) processImage(lastImage, false); });
+  $('inv').addEventListener('change', () => { if (lastImage) processImage(lastImage, false); });
+  stage.addEventListener('dragover', (e) => { e.preventDefault(); stage.classList.add('drop'); });
+  stage.addEventListener('dragleave', () => stage.classList.remove('drop'));
+  stage.addEventListener('drop', (e) => { e.preventDefault(); stage.classList.remove('drop'); loadFile(e.dataTransfer.files[0]); });
+
+  // Freehand drawing
+  const toNorm = (e) => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - W / 2) / S, y: (e.clientY - r.top - H / 2) / S }; };
+  cv.addEventListener('pointerdown', (e) => { cv.setPointerCapture(e.pointerId); drawing = [toNorm(e)]; trace = []; });
+  cv.addEventListener('pointermove', (e) => { if (drawing) drawing.push(toNorm(e)); });
+  const endDraw = () => {
+    if (!drawing) return;
+    const pts = drawing;
+    drawing = null;
+    if (pts.length > 8) { showImageTools(false); $('hint').textContent = 'Arraste de novo para desenhar outro.'; setSource(pts); }
+  };
+  cv.addEventListener('pointerup', endDraw);
+  cv.addEventListener('pointercancel', endDraw);
+
+  // Controls
+  $('terms').addEventListener('input', (e) => { terms = +e.target.value; $('termsOut').textContent = terms; restart(); });
+  $('speed').addEventListener('input', (e) => { speed = +e.target.value; $('speedOut').textContent = speed.toFixed(1) + '×'; });
+  $('playBtn').addEventListener('click', () => { playing = !playing; $('playBtn').textContent = playing ? 'Pausar' : 'Continuar'; });
+  $('restartBtn').addEventListener('click', restart);
+  $('clearBtn').addEventListener('click', () => {
+    source = []; coeffs = []; trace = [];
+    showImageTools(false);
+    $('hint').textContent = defaultHint;
+    renderTable();
+  });
+  $('playBtn').textContent = playing ? 'Pausar' : 'Continuar';
+
+  function restart() { t = 0; trace = []; }
+
+  function renderTable() {
+    const rows = coeffs.slice(1, 9).map((c) =>
+      `<tr><td>${c.f > 0 ? '+' : ''}${c.f}</td><td>${(c.amp * 100).toFixed(2)}</td><td>${Math.round((c.ph * 180) / Math.PI)}°</td></tr>`);
+    $('coefs').innerHTML = rows.join('') || '<tr><td colspan="3" style="text-align:left;color:var(--text-dim)">Nada desenhado ainda.</td></tr>';
+  }
+
+  // Status bar
+  let statusMsg = null, statusUntil = 0;
+  function setStatus(msg) { statusMsg = msg; statusUntil = performance.now() + 4000; }
+  function updateStatus(n) {
+    if (statusMsg && performance.now() < statusUntil) { $('statusLeft').textContent = statusMsg; return; }
+    if (!n) { $('statusLeft').textContent = 'Pronto'; $('energyLine').textContent = ''; return; }
+    let e = 0;
+    for (let i = 0; i < n; i++) e += coeffs[i].amp ** 2;
+    const pct = ((e / totalEnergy) * 100).toFixed(1);
+    $('statusLeft').textContent = `${n} de ${coeffs.length} termos · ${pct}% da energia`;
+    $('energyLine').textContent = `Esses termos cobrem ${pct}% da energia do contorno.`;
+  }
+
+  // Rendering
+  function resize() {
+    const r = cv.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = r.width; H = r.height; S = Math.min(W, H);
+    trace = [];
+  }
+  new ResizeObserver(resize).observe(cv);
+
+  function tip(time, n) {
+    let x = 0, y = 0;
+    for (let i = 0; i < n; i++) {
+      const c = coeffs[i], a = 2 * Math.PI * c.f * time + c.ph;
+      x += c.amp * Math.cos(a); y += c.amp * Math.sin(a);
+    }
+    return { x, y };
+  }
+
+  function drawGrid() {
+    const step = S / 20;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = COLORS.grid;
+    ctx.beginPath();
+    for (let x = (W / 2) % step; x < W; x += step) { ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); }
+    for (let y = (H / 2) % step; y < H; y += step) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
+    ctx.stroke();
+    ctx.strokeStyle = COLORS.axis;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(W / 2) + 0.5, 0); ctx.lineTo(Math.round(W / 2) + 0.5, H);
+    ctx.moveTo(0, Math.round(H / 2) + 0.5); ctx.lineTo(W, Math.round(H / 2) + 0.5);
+    ctx.stroke();
+  }
+
+  function strokePath(pts, close) {
+    const X = (p) => W / 2 + p.x * S, Y = (p) => H / 2 + p.y * S;
+    ctx.beginPath();
+    pts.forEach((p, i) => (i ? ctx.lineTo(X(p), Y(p)) : ctx.moveTo(X(p), Y(p))));
+    if (close) ctx.closePath();
+    ctx.stroke();
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    drawGrid();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    const n = Math.min(terms, coeffs.length);
+
+    if (source.length && $('showGhost').checked) {
+      ctx.setLineDash([4, 5]); ctx.strokeStyle = COLORS.ghost; ctx.lineWidth = 1.2;
+      strokePath(source, true);
+      ctx.setLineDash([]);
+    }
+
+    if (drawing) {
+      ctx.strokeStyle = COLORS.pen; ctx.lineWidth = 2;
+      strokePath(drawing, false);
+      $('statusLeft').textContent = `Desenhando · ${drawing.length} pontos`;
+      requestAnimationFrame(frame);
+      return;
+    }
+
+    if (n) {
+      if (playing) {
+        const steps = Math.max(1, Math.ceil(speed * 2));
+        const dt = speed / 900 / steps;
+        for (let s = 0; s < steps; s++) {
+          t += dt;
+          if (t >= 1) { t -= 1; trace = []; }
+          trace.push(tip(t, n));
+        }
+      } else if (!trace.length) {
+        for (let k = 0; k <= M; k++) trace.push(tip(k / M, n));
+      }
+
+      let x = 0, y = 0;
+      for (let i = 0; i < n; i++) {
+        const c = coeffs[i], a = 2 * Math.PI * c.f * t + c.ph;
+        const nx = x + c.amp * Math.cos(a), ny = y + c.amp * Math.sin(a);
+        if ($('showCircles').checked && c.amp * S > 0.6) {
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = COLORS.circle;
+          ctx.beginPath(); ctx.arc(W / 2 + x * S, H / 2 + y * S, c.amp * S, 0, 2 * Math.PI); ctx.stroke();
+          ctx.strokeStyle = COLORS.vector;
+          ctx.beginPath(); ctx.moveTo(W / 2 + x * S, H / 2 + y * S); ctx.lineTo(W / 2 + nx * S, H / 2 + ny * S); ctx.stroke();
+        }
+        x = nx; y = ny;
+      }
+
+      ctx.strokeStyle = COLORS.trace; ctx.lineWidth = 2.2;
+      strokePath(trace, false);
+      ctx.fillStyle = COLORS.tip;
+      ctx.beginPath(); ctx.arc(W / 2 + x * S, H / 2 + y * S, 4, 0, 2 * Math.PI); ctx.fill();
+    }
+    updateStatus(n);
+    requestAnimationFrame(frame);
+  }
+
+  // Visitor counter
+  fetch('https://abacus.jasoncameron.dev/hit/fourier-epiciclos-leobonacini/visits')
+    .then(r => r.json())
+    .then(data => { $('visitorCounter').textContent = `visitas: ${data.value}`; })
+    .catch(() => { $('visitorCounter').textContent = 'visitas: n/a'; });
+
+  resize();
+  setSource(examples.heart());
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
