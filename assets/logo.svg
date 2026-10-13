@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="efFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5aa9e6" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#5aa9e6" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
+  <!-- frame -->
+  <rect x="6" y="6" width="52" height="52" rx="8" fill="url(#efFill)" stroke="#5aa9e6" stroke-width="2.5"/>
+
+  <!-- traced curve -->
+  <path d="M14 46 C 14 30, 26 16, 40 18 S 52 34, 46 44" fill="none" stroke="#e15b64" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 3"/>
+
+  <!-- epicycles: big circle, small circle on its rim -->
+  <circle cx="26" cy="36" r="12" fill="none" stroke="#5aa9e6" stroke-width="2"/>
+  <circle cx="35.2" cy="28.3" r="6" fill="none" stroke="#5aa9e6" stroke-width="1.8"/>
+  <path d="M26 36 L35.2 28.3 L40.1 24.8" fill="none" stroke="#5aa9e6" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- centers and pen tip -->
+  <circle cx="26" cy="36" r="3" fill="#14171c" stroke="#5aa9e6" stroke-width="2"/>
+  <circle cx="35.2" cy="28.3" r="2.6" fill="#14171c" stroke="#5aa9e6" stroke-width="1.8"/>
+  <circle cx="40.1" cy="24.8" r="3.6" fill="#e15b64"/>
+</svg>
