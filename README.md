@@ -2,8 +2,6 @@
 
 # Epiciclos de Fourier
 
-Desenhe um contorno e veja círculos girando refazerem o traço.
-
 <br clear="left">
 
 Epiciclos de Fourier é uma ferramenta em HTML estático, num arquivo só, que transforma um desenho em uma soma de círculos girando (a série de Fourier discreta do contorno). Não tem backend, build nem chave de API: tudo roda no navegador, e a imagem que você abre não sai do seu computador.
