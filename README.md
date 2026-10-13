@@ -8,7 +8,7 @@ Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a
 
 ## Features
 
-- **Freehand drawing**: click and drag on the canvas; when you release, the stroke is closed and the animation starts
+- **Freehand drawing**: click and drag on the canvas; when you release, the stroke is closed and the animation starts. A dashed line previews the closing segment, the start point lights up when you get close to it, and right click or Esc cancels the stroke
 - **Outline from an image**: open or drop a PNG, JPG or SVG; the outline is extracted automatically, with an adjustable threshold and an invert option
 - **Built-in examples**: heart, star, trefoil and the letter π
 - **Number of terms**: 1 to 300 circles, with the share of the outline's energy they cover

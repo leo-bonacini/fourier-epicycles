@@ -347,6 +347,7 @@
       canvas: 'Área de desenho',
       hintDraw: 'Clique e arraste para desenhar. Também dá para soltar uma imagem aqui.',
       hintAgain: 'Arraste de novo para desenhar outro.',
+      hintDrawing: 'Solte para fechar o traço. Botão direito ou Esc cancela.',
       terms: 'Termos', speed: 'Velocidade',
       showCircles: 'Mostrar círculos', showGhost: 'Mostrar contorno original',
       image: 'Imagem',
@@ -377,6 +378,7 @@
       canvas: 'Drawing area',
       hintDraw: 'Click and drag to draw. You can also drop an image here.',
       hintAgain: 'Drag again to draw another one.',
+      hintDrawing: 'Release to close the outline. Right click or Esc cancels.',
       terms: 'Terms', speed: 'Speed',
       showCircles: 'Show circles', showGhost: 'Show original outline',
       image: 'Image',
@@ -407,6 +409,7 @@
       canvas: 'Área de dibujo',
       hintDraw: 'Haz clic y arrastra para dibujar. También puedes soltar una imagen aquí.',
       hintAgain: 'Arrastra de nuevo para dibujar otro.',
+      hintDrawing: 'Suelta para cerrar el contorno. Clic derecho o Esc cancela.',
       terms: 'Términos', speed: 'Velocidad',
       showCircles: 'Mostrar círculos', showGhost: 'Mostrar contorno original',
       image: 'Imagen',
@@ -733,13 +736,35 @@
 
   // Freehand drawing
   const toNorm = (e) => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - W / 2) / S, y: (e.clientY - r.top - H / 2) / S }; };
-  cv.addEventListener('pointerdown', (e) => { cv.setPointerCapture(e.pointerId); drawing = [toNorm(e)]; trace = []; });
-  cv.addEventListener('pointermove', (e) => { if (drawing) drawing.push(toNorm(e)); });
+  let hintBeforeDraw = 'hintDraw';
+  const cancelDraw = () => {
+    if (!drawing) return;
+    drawing = null;
+    trace = [];
+    setHint(hintBeforeDraw);
+  };
+  cv.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) { cancelDraw(); return; }
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    drawing = [toNorm(e)];
+    trace = [];
+    hintBeforeDraw = hintKey;
+    setHint('hintDrawing');
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!drawing) return;
+    if (e.buttons & 2) { cancelDraw(); return; }
+    drawing.push(toNorm(e));
+  });
+  // Right click is reserved for cancelling a stroke, so the browser menu stays closed
+  stage.addEventListener('contextmenu', (e) => { e.preventDefault(); cancelDraw(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cancelDraw(); });
   const endDraw = () => {
     if (!drawing) return;
     const pts = drawing;
     drawing = null;
     if (pts.length > 8) { showImageTools(false); setHint('hintAgain'); setSource(pts); }
+    else setHint(hintBeforeDraw);
   };
   cv.addEventListener('pointerup', endDraw);
   cv.addEventListener('pointercancel', endDraw);
@@ -827,7 +852,7 @@
     ctx.lineCap = 'round';
     const n = Math.min(terms, coeffs.length);
 
-    if (source.length && $('showGhost').checked) {
+    if (source.length && $('showGhost').checked && !drawing) {
       ctx.setLineDash([4, 5]); ctx.strokeStyle = COLORS.ghost; ctx.lineWidth = 1.2;
       strokePath(source, true);
       ctx.setLineDash([]);
@@ -836,6 +861,18 @@
     if (drawing) {
       ctx.strokeStyle = COLORS.pen; ctx.lineWidth = 2;
       strokePath(drawing, false);
+      // Preview of the segment that will close the outline, and the start point
+      const first = drawing[0], last = drawing[drawing.length - 1];
+      const near = Math.hypot(last.x - first.x, last.y - first.y) * S < 14;
+      ctx.setLineDash([4, 5]); ctx.strokeStyle = COLORS.ghost; ctx.lineWidth = 1.2;
+      strokePath([last, first], false);
+      ctx.setLineDash([]);
+      ctx.fillStyle = COLORS.tip;
+      ctx.beginPath(); ctx.arc(W / 2 + first.x * S, H / 2 + first.y * S, near ? 6 : 4, 0, 2 * Math.PI); ctx.fill();
+      if (near) {
+        ctx.strokeStyle = COLORS.tip; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(W / 2 + first.x * S, H / 2 + first.y * S, 11, 0, 2 * Math.PI); ctx.stroke();
+      }
       $('statusLeft').textContent = tr('drawingStatus', drawing.length);
       requestAnimationFrame(frame);
       return;
