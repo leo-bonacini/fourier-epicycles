@@ -52,7 +52,7 @@
     text-overflow: ellipsis;
     color: var(--text);
   }
-  #topbar h1 span { color: var(--text-dim); font-weight: 400; }
+  #topbar h1 .tag { color: var(--text-dim); font-weight: 400; }
   #topbar .group { display: flex; gap: 6px; flex-wrap: wrap; }
 
   .btn {
@@ -116,7 +116,7 @@
     align-items: center;
     justify-content: space-between;
   }
-  .sidebar-section h2 span { color: var(--text); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .sidebar-section h2 output { color: var(--text); letter-spacing: 0; font-variant-numeric: tabular-nums; }
   input[type=range] { width: 100%; accent-color: var(--accent); margin: 0 0 4px 0; }
   .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 4px 0; cursor: pointer; }
   .check-row input { accent-color: var(--accent); }
@@ -175,72 +175,73 @@
 
 <div id="topbar">
   <div class="brand">
-    <img src="assets/logo.svg" alt="Logo Epiciclos de Fourier">
-    <h1>Epiciclos de Fourier <span>· desenhe um contorno e veja círculos girando refazerem o traço</span></h1>
+    <img src="assets/logo.svg" data-i18n-alt="logoAlt" alt="Logo Epiciclos de Fourier">
+    <h1><span data-i18n="name">Epiciclos de Fourier</span> <span class="tag" data-i18n="tagline">· desenhe um contorno e veja círculos girando refazerem o traço</span></h1>
   </div>
   <div class="group">
-    <select id="exampleSelect" class="example-select" aria-label="Exemplos">
-      <option value="">Exemplos</option>
-      <option value="heart">Coração</option>
-      <option value="star">Estrela</option>
-      <option value="knot">Trifólio</option>
-      <option value="pi">Letra π</option>
+    <select id="exampleSelect" class="example-select" data-i18n-aria="examples" aria-label="Exemplos">
+      <option value="" data-i18n="examples">Exemplos</option>
+      <option value="heart" data-i18n="exHeart">Coração</option>
+      <option value="star" data-i18n="exStar">Estrela</option>
+      <option value="knot" data-i18n="exKnot">Trifólio</option>
+      <option value="pi" data-i18n="exPi">Letra π</option>
     </select>
     <input id="fileInput" type="file" accept="image/*" style="display:none">
-    <button class="btn" id="fileBtn">Abrir imagem</button>
+    <button class="btn" id="fileBtn" data-i18n="openImage">Abrir imagem</button>
   </div>
   <div class="group">
     <button class="btn primary" id="playBtn">Pausar</button>
-    <button class="btn" id="restartBtn">Recomeçar</button>
-    <button class="btn danger" id="clearBtn">Limpar</button>
+    <button class="btn" id="restartBtn" data-i18n="restart">Recomeçar</button>
+    <button class="btn danger" id="clearBtn" data-i18n="clear">Limpar</button>
   </div>
+  <button class="btn" id="langBtn" aria-label="Switch language">EN</button>
 </div>
 
 <div id="main">
   <div id="stage">
-    <canvas id="cv" aria-label="Área de desenho"></canvas>
+    <canvas id="cv" data-i18n-aria="canvas" aria-label="Área de desenho"></canvas>
     <div id="hint">Clique e arraste para desenhar. Também dá para soltar uma imagem aqui.</div>
   </div>
 
   <div id="sidebar">
     <div class="sidebar-section">
-      <h2>Termos <span id="termsOut">40</span></h2>
+      <h2><span data-i18n="terms">Termos</span> <output id="termsOut">40</output></h2>
       <input id="terms" type="range" min="1" max="300" value="40">
       <div class="meta-line" id="energyLine"></div>
     </div>
 
     <div class="sidebar-section">
-      <h2>Velocidade <span id="speedOut">1.0×</span></h2>
+      <h2><span data-i18n="speed">Velocidade</span> <output id="speedOut">1.0×</output></h2>
       <input id="speed" type="range" min="0.2" max="5" step="0.1" value="1">
-      <label class="check-row"><input id="showCircles" type="checkbox" checked> Mostrar círculos</label>
-      <label class="check-row"><input id="showGhost" type="checkbox" checked> Mostrar contorno original</label>
+      <label class="check-row"><input id="showCircles" type="checkbox" checked> <span data-i18n="showCircles">Mostrar círculos</span></label>
+      <label class="check-row"><input id="showGhost" type="checkbox" checked> <span data-i18n="showGhost">Mostrar contorno original</span></label>
     </div>
 
     <div class="sidebar-section">
-      <h2>Imagem</h2>
-      <p class="empty-hint" id="imgEmpty">Nenhuma imagem aberta. Use <b>Abrir imagem</b> ou solte um PNG, JPG ou SVG no quadro.</p>
+      <h2 data-i18n="image">Imagem</h2>
+      <p class="empty-hint" id="imgEmpty" data-i18n-html="imgEmpty">Nenhuma imagem aberta. Use <b>Abrir imagem</b> ou solte um PNG, JPG ou SVG no quadro.</p>
       <div id="imgTools" hidden>
         <canvas id="thumb" width="160" height="120"></canvas>
-        <div class="field-label"><span>Limiar</span><span id="thrOut">auto</span></div>
+        <div class="field-label"><span data-i18n="threshold">Limiar</span><span id="thrOut">auto</span></div>
         <input id="thr" type="range" min="1" max="254" value="128">
-        <label class="check-row"><input id="inv" type="checkbox"> Inverter cores</label>
-        <div class="meta-line">Usa a borda externa da maior forma da imagem.</div>
+        <label class="check-row"><input id="inv" type="checkbox"> <span data-i18n="invert">Inverter cores</span></label>
+        <div class="meta-line" data-i18n="outerEdge">Usa a borda externa da maior forma da imagem.</div>
       </div>
     </div>
 
     <div class="sidebar-section">
-      <h2>Maiores coeficientes</h2>
+      <h2 data-i18n="coefs">Maiores coeficientes</h2>
       <table>
-        <thead><tr><th>n</th><th>|c<sub>n</sub>|</th><th>fase</th></tr></thead>
+        <thead><tr><th>n</th><th>|c<sub>n</sub>|</th><th data-i18n="phase">fase</th></tr></thead>
         <tbody id="coefs"></tbody>
       </table>
     </div>
 
     <div class="sidebar-section how">
-      <h2>Como funciona</h2>
-      <p>Cada ponto (x, y) do contorno vira <code>z = x + iy</code>, e o contorno é refeito com 512 pontos à mesma distância.</p>
-      <p>A DFT calcula <code>c<sub>n</sub> = (1/N) Σ z<sub>k</sub> e<sup>−i2πnk/N</sup></code>. Cada coeficiente é um círculo: o módulo é o raio e o argumento é o ângulo de partida.</p>
-      <p>O círculo <code>n</code> dá <code>n</code> voltas por ciclo. Com um preso na ponta do outro, do maior para o menor, a ponta do último refaz o desenho.</p>
+      <h2 data-i18n="how">Como funciona</h2>
+      <p data-i18n-html="how1">Cada ponto (x, y) do contorno vira <code>z = x + iy</code>, e o contorno é refeito com 512 pontos à mesma distância.</p>
+      <p data-i18n-html="how2">A DFT calcula <code>c<sub>n</sub> = (1/N) Σ z<sub>k</sub> e<sup>−i2πnk/N</sup></code>. Cada coeficiente é um círculo: o módulo é o raio e o argumento é o ângulo de partida.</p>
+      <p data-i18n-html="how3">O círculo <code>n</code> dá <code>n</code> voltas por ciclo. Com um preso na ponta do outro, do maior para o menor, a ponta do último refaz o desenho.</p>
     </div>
   </div>
 </div>
@@ -285,7 +286,104 @@
   let drawing = null;
   let lastImage = null;
   let autoThr = true;
-  const defaultHint = $('hint').textContent;
+  let hintKey = 'hintDraw';
+  let visits = null;
+
+  const STRINGS = {
+    pt: {
+      title: 'Epiciclos de Fourier',
+      name: 'Epiciclos de Fourier',
+      tagline: '· desenhe um contorno e veja círculos girando refazerem o traço',
+      logoAlt: 'Logo Epiciclos de Fourier',
+      examples: 'Exemplos', exHeart: 'Coração', exStar: 'Estrela', exKnot: 'Trifólio', exPi: 'Letra π',
+      openImage: 'Abrir imagem', pause: 'Pausar', resume: 'Continuar', restart: 'Recomeçar', clear: 'Limpar',
+      canvas: 'Área de desenho',
+      hintDraw: 'Clique e arraste para desenhar. Também dá para soltar uma imagem aqui.',
+      hintAgain: 'Arraste de novo para desenhar outro.',
+      terms: 'Termos', speed: 'Velocidade',
+      showCircles: 'Mostrar círculos', showGhost: 'Mostrar contorno original',
+      image: 'Imagem',
+      imgEmpty: 'Nenhuma imagem aberta. Use <b>Abrir imagem</b> ou solte um PNG, JPG ou SVG no quadro.',
+      threshold: 'Limiar', invert: 'Inverter cores',
+      outerEdge: 'Usa a borda externa da maior forma da imagem.',
+      coefs: 'Maiores coeficientes', phase: 'fase', noCurve: 'Nada desenhado ainda.',
+      how: 'Como funciona',
+      how1: 'Cada ponto (x, y) do contorno vira <code>z = x + iy</code>, e o contorno é refeito com 512 pontos à mesma distância.',
+      how2: 'A DFT calcula <code>c<sub>n</sub> = (1/N) Σ z<sub>k</sub> e<sup>−i2πnk/N</sup></code>. Cada coeficiente é um círculo: o módulo é o raio e o argumento é o ângulo de partida.',
+      how3: 'O círculo <code>n</code> dá <code>n</code> voltas por ciclo. Com um preso na ponta do outro, do maior para o menor, a ponta do último refaz o desenho.',
+      ready: 'Pronto',
+      status: (n, N, pct) => `${n} de ${N} termos · ${pct}% da energia`,
+      energy: (pct) => `Esses termos cobrem ${pct}% da energia do contorno.`,
+      drawingStatus: (k) => `Desenhando · ${k} pontos`,
+      noShape: 'Nenhuma forma encontrada. Mude o limiar ou inverta as cores.',
+      notImage: 'Esse arquivo não é uma imagem.',
+      badImage: 'Não deu para abrir essa imagem.',
+      visits: 'visitas',
+    },
+    en: {
+      title: 'Fourier Epicycles',
+      name: 'Fourier Epicycles',
+      tagline: '· draw an outline and watch spinning circles trace it back',
+      logoAlt: 'Fourier Epicycles logo',
+      examples: 'Examples', exHeart: 'Heart', exStar: 'Star', exKnot: 'Trefoil', exPi: 'Letter π',
+      openImage: 'Open image', pause: 'Pause', resume: 'Resume', restart: 'Restart', clear: 'Clear',
+      canvas: 'Drawing area',
+      hintDraw: 'Click and drag to draw. You can also drop an image here.',
+      hintAgain: 'Drag again to draw another one.',
+      terms: 'Terms', speed: 'Speed',
+      showCircles: 'Show circles', showGhost: 'Show original outline',
+      image: 'Image',
+      imgEmpty: 'No image open. Use <b>Open image</b> or drop a PNG, JPG or SVG onto the canvas.',
+      threshold: 'Threshold', invert: 'Invert colors',
+      outerEdge: 'Uses the outer edge of the largest shape in the image.',
+      coefs: 'Largest coefficients', phase: 'phase', noCurve: 'Nothing drawn yet.',
+      how: 'How it works',
+      how1: 'Each point (x, y) of the outline becomes <code>z = x + iy</code>, and the outline is resampled to 512 evenly spaced points.',
+      how2: 'The DFT computes <code>c<sub>n</sub> = (1/N) Σ z<sub>k</sub> e<sup>−i2πnk/N</sup></code>. Each coefficient is a circle: its magnitude is the radius and its argument is the starting angle.',
+      how3: 'Circle <code>n</code> turns <code>n</code> times per cycle. Chained tip to tail, largest first, the tip of the last one redraws the shape.',
+      ready: 'Ready',
+      status: (n, N, pct) => `${n} of ${N} terms · ${pct}% of the energy`,
+      energy: (pct) => `These terms cover ${pct}% of the outline's energy.`,
+      drawingStatus: (k) => `Drawing · ${k} points`,
+      noShape: 'No shape found. Change the threshold or invert the colors.',
+      notImage: 'That file is not an image.',
+      badImage: 'Could not open that image.',
+      visits: 'visits',
+    },
+  };
+
+  let lang = 'en';
+  try { lang = localStorage.getItem('epiciclos-lang') || ''; } catch (e) {}
+  if (!STRINGS[lang]) lang = (navigator.language || '').toLowerCase().startsWith('pt') ? 'pt' : 'en';
+  const tr = (key, ...args) => { const v = STRINGS[lang][key]; return typeof v === 'function' ? v(...args) : v; };
+
+  function applyLang() {
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.title = tr('title');
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = tr(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = tr(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', tr(el.dataset.i18nAria)));
+    document.querySelectorAll('[data-i18n-alt]').forEach((el) => { el.alt = tr(el.dataset.i18nAlt); });
+    $('langBtn').textContent = lang === 'pt' ? 'EN' : 'PT';
+    $('langBtn').title = lang === 'pt' ? 'Switch to English' : 'Mudar para português';
+    $('hint').textContent = tr(hintKey);
+    $('playBtn').textContent = tr(playing ? 'pause' : 'resume');
+    if (autoThr && lastImage) $('thrOut').textContent = `auto (${$('thr').value})`;
+    renderVisits();
+    renderTable();
+  }
+
+  function setHint(key) { hintKey = key; $('hint').textContent = tr(key); }
+
+  function renderVisits() {
+    $('visitorCounter').textContent = `${tr('visits')}: ${visits ?? (visits === null ? '…' : 'n/a')}`;
+  }
+
+  $('langBtn').addEventListener('click', () => {
+    lang = lang === 'pt' ? 'en' : 'pt';
+    try { localStorage.setItem('epiciclos-lang', lang); } catch (e) {}
+    applyLang();
+  });
 
   // Curve math
   function dedupe(p) {
@@ -382,7 +480,7 @@
     const k = e.target.value;
     if (!examples[k]) return;
     showImageTools(false);
-    $('hint').textContent = defaultHint;
+    setHint('hintDraw');
     setSource(examples[k]());
     e.target.value = '';
   });
@@ -492,8 +590,8 @@
     const comp = largestComponent(mask, w, h);
     const contour = comp.size > 10 ? traceContour(comp.mask, w, h) : [];
     drawThumb(comp.mask, w, h, contour);
-    if (contour.length < 8) { setStatus('Nenhuma forma encontrada. Mude o limiar ou inverta as cores.'); return; }
-    $('hint').textContent = defaultHint;
+    if (contour.length < 8) { setStatus(tr('noShape')); return; }
+    setHint('hintDraw');
     setSource(normalize(contour));
   }
 
@@ -520,11 +618,11 @@
 
   function loadFile(file) {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setStatus('Esse arquivo não é uma imagem.'); return; }
+    if (!file.type.startsWith('image/')) { setStatus(tr('notImage')); return; }
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => { lastImage = img; autoThr = true; showImageTools(true); processImage(img, true); };
-    img.onerror = () => setStatus('Não deu para abrir essa imagem.');
+    img.onerror = () => setStatus(tr('badImage'));
     img.src = url;
   }
 
@@ -544,7 +642,7 @@
     if (!drawing) return;
     const pts = drawing;
     drawing = null;
-    if (pts.length > 8) { showImageTools(false); $('hint').textContent = 'Arraste de novo para desenhar outro.'; setSource(pts); }
+    if (pts.length > 8) { showImageTools(false); setHint('hintAgain'); setSource(pts); }
   };
   cv.addEventListener('pointerup', endDraw);
   cv.addEventListener('pointercancel', endDraw);
@@ -552,22 +650,21 @@
   // Controls
   $('terms').addEventListener('input', (e) => { terms = +e.target.value; $('termsOut').textContent = terms; restart(); });
   $('speed').addEventListener('input', (e) => { speed = +e.target.value; $('speedOut').textContent = speed.toFixed(1) + '×'; });
-  $('playBtn').addEventListener('click', () => { playing = !playing; $('playBtn').textContent = playing ? 'Pausar' : 'Continuar'; });
+  $('playBtn').addEventListener('click', () => { playing = !playing; $('playBtn').textContent = tr(playing ? 'pause' : 'resume'); });
   $('restartBtn').addEventListener('click', restart);
   $('clearBtn').addEventListener('click', () => {
     source = []; coeffs = []; trace = [];
     showImageTools(false);
-    $('hint').textContent = defaultHint;
+    setHint('hintDraw');
     renderTable();
   });
-  $('playBtn').textContent = playing ? 'Pausar' : 'Continuar';
 
   function restart() { t = 0; trace = []; }
 
   function renderTable() {
     const rows = coeffs.slice(1, 9).map((c) =>
       `<tr><td>${c.f > 0 ? '+' : ''}${c.f}</td><td>${(c.amp * 100).toFixed(2)}</td><td>${Math.round((c.ph * 180) / Math.PI)}°</td></tr>`);
-    $('coefs').innerHTML = rows.join('') || '<tr><td colspan="3" style="text-align:left;color:var(--text-dim)">Nada desenhado ainda.</td></tr>';
+    $('coefs').innerHTML = rows.join('') || `<tr><td colspan="3" style="text-align:left;color:var(--text-dim)">${tr('noCurve')}</td></tr>`;
   }
 
   // Status bar
@@ -575,12 +672,12 @@
   function setStatus(msg) { statusMsg = msg; statusUntil = performance.now() + 4000; }
   function updateStatus(n) {
     if (statusMsg && performance.now() < statusUntil) { $('statusLeft').textContent = statusMsg; return; }
-    if (!n) { $('statusLeft').textContent = 'Pronto'; $('energyLine').textContent = ''; return; }
+    if (!n) { $('statusLeft').textContent = tr('ready'); $('energyLine').textContent = ''; return; }
     let e = 0;
     for (let i = 0; i < n; i++) e += coeffs[i].amp ** 2;
-    const pct = ((e / totalEnergy) * 100).toFixed(1);
-    $('statusLeft').textContent = `${n} de ${coeffs.length} termos · ${pct}% da energia`;
-    $('energyLine').textContent = `Esses termos cobrem ${pct}% da energia do contorno.`;
+    const pct = ((e / totalEnergy) * 100).toLocaleString(lang === 'pt' ? 'pt-BR' : 'en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    $('statusLeft').textContent = tr('status', n, coeffs.length, pct);
+    $('energyLine').textContent = tr('energy', pct);
   }
 
   // Rendering
@@ -642,7 +739,7 @@
     if (drawing) {
       ctx.strokeStyle = COLORS.pen; ctx.lineWidth = 2;
       strokePath(drawing, false);
-      $('statusLeft').textContent = `Desenhando · ${drawing.length} pontos`;
+      $('statusLeft').textContent = tr('drawingStatus', drawing.length);
       requestAnimationFrame(frame);
       return;
     }
@@ -686,9 +783,10 @@
   // Visitor counter
   fetch('https://abacus.jasoncameron.dev/hit/fourier-epiciclos-leobonacini/visits')
     .then(r => r.json())
-    .then(data => { $('visitorCounter').textContent = `visitas: ${data.value}`; })
-    .catch(() => { $('visitorCounter').textContent = 'visitas: n/a'; });
+    .then(data => { visits = data.value; renderVisits(); })
+    .catch(() => { visits = undefined; renderVisits(); });
 
+  applyLang();
   resize();
   setSource(examples.heart());
   requestAnimationFrame(frame);
