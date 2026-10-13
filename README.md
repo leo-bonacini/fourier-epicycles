@@ -14,7 +14,7 @@ Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a
 - **Number of terms**: 1 to 300 circles, with the share of the outline's energy they cover
 - **Coefficient table**: the 8 largest coefficients (frequency, magnitude and phase)
 - **Display options**: speed, circles and original outline can each be toggled
-- **Three languages**: English (US), Portuguese (Brazil) and Spanish (Spain), picked from the browser language on first visit, switchable with the flag buttons in the top bar and remembered afterwards
+- **Three languages**: English (US), Portuguese (Brazil) and Spanish (Spain), picked from the browser language on first visit, switchable from the language menu in the top bar and remembered afterwards
 
 ## Usage
 

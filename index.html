@@ -79,20 +79,42 @@
     font-size: 12.5px;
   }
 
-  .lang-switch { display: flex; gap: 4px; }
-  .flag {
+  .lang-menu { position: relative; }
+  .lang-current { display: flex; align-items: center; gap: 7px; }
+  .lang-current .caret { width: 10px; height: 10px; opacity: 0.7; }
+  .lang-flag { display: inline-flex; line-height: 0; }
+  .lang-flag svg { width: 21px; height: 14px; border-radius: 2px; display: block; }
+  .lang-list {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 200px;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 5px 6px;
-    cursor: pointer;
-    line-height: 0;
-    opacity: 0.55;
+    padding: 4px;
+    display: grid;
+    gap: 2px;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
-  .flag svg { width: 21px; height: 14px; border-radius: 2px; display: block; }
-  .flag:hover { opacity: 0.85; border-color: var(--accent); }
-  .flag[aria-pressed="true"] { opacity: 1; border-color: var(--accent); background: var(--accent-dim); }
-  .flag:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .lang-list button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--text);
+    font: inherit;
+    font-size: 12.5px;
+    padding: 7px 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .lang-list button:hover, .lang-list button:focus-visible { background: var(--accent-dim); outline: none; }
+  .lang-list button[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--accent); }
 
   /* Main layout */
   #main { flex: 1 1 auto; display: flex; min-height: 0; }
@@ -209,16 +231,16 @@
     <button class="btn" id="restartBtn" data-i18n="restart">Recomeçar</button>
     <button class="btn danger" id="clearBtn" data-i18n="clear">Limpar</button>
   </div>
-  <div class="lang-switch" role="group" aria-label="Idioma / Language / Idioma">
-    <button class="flag" data-lang="pt" title="Português (Brasil)" aria-label="Português (Brasil)">
-      <svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#009c3b"/><path d="M15 2.5 27 10 15 17.5 3 10z" fill="#ffdf00"/><circle cx="15" cy="10" r="4.4" fill="#002776"/></svg>
+  <div class="lang-menu" id="langMenu">
+    <button class="btn lang-current" id="langBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="langList" aria-label="Idioma / Language">
+      <span class="lang-flag" id="langFlag"></span><span id="langCode">EN</span>
+      <svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <button class="flag" data-lang="en" title="English (US)" aria-label="English (US)">
-      <svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#b22234"/><g fill="#fff"><rect y="1.538" width="30" height="1.538"/><rect y="4.615" width="30" height="1.538"/><rect y="7.692" width="30" height="1.538"/><rect y="10.769" width="30" height="1.538"/><rect y="13.846" width="30" height="1.538"/><rect y="16.923" width="30" height="1.538"/></g><rect width="12" height="10.77" fill="#3c3b6e"/></svg>
-    </button>
-    <button class="flag" data-lang="es" title="Español (España)" aria-label="Español (España)">
-      <svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/></svg>
-    </button>
+    <div class="lang-list" id="langList" role="menu" hidden>
+    <button role="menuitemradio" data-lang="pt" aria-checked="false"><span class="lang-flag"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#009c3b"/><path d="M15 2.5 27 10 15 17.5 3 10z" fill="#ffdf00"/><circle cx="15" cy="10" r="4.4" fill="#002776"/></svg></span>Português (Brasil)</button>
+    <button role="menuitemradio" data-lang="en" aria-checked="false"><span class="lang-flag"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#b22234"/><g fill="#fff"><rect y="1.538" width="30" height="1.538"/><rect y="4.615" width="30" height="1.538"/><rect y="7.692" width="30" height="1.538"/><rect y="10.769" width="30" height="1.538"/><rect y="13.846" width="30" height="1.538"/><rect y="16.923" width="30" height="1.538"/></g><rect width="12" height="10.77" fill="#3c3b6e"/></svg></span>English (US)</button>
+    <button role="menuitemradio" data-lang="es" aria-checked="false"><span class="lang-flag"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/></svg></span>Español (España)</button>
+    </div>
   </div>
 </div>
 
@@ -415,6 +437,7 @@
     const nav = (navigator.language || '').toLowerCase();
     lang = nav.startsWith('pt') ? 'pt' : nav.startsWith('es') ? 'es' : 'en';
   }
+  const langItems = [...document.querySelectorAll('#langList [data-lang]')];
   const tr = (key, ...args) => { const v = STRINGS[lang][key]; return typeof v === 'function' ? v(...args) : v; };
 
   function applyLang() {
@@ -424,7 +447,9 @@
     document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = tr(el.dataset.i18nHtml); });
     document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', tr(el.dataset.i18nAria)));
     document.querySelectorAll('[data-i18n-alt]').forEach((el) => { el.alt = tr(el.dataset.i18nAlt); });
-    document.querySelectorAll('.flag').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    langItems.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
+    $('langFlag').innerHTML = document.querySelector(`#langList [data-lang="${lang}"] .lang-flag`).innerHTML;
+    $('langCode').textContent = lang.toUpperCase();
     $('hint').textContent = tr(hintKey);
     $('playBtn').textContent = tr(playing ? 'pause' : 'resume');
     if (autoThr && lastImage) $('thrOut').textContent = `auto (${$('thr').value})`;
@@ -438,11 +463,27 @@
     $('visitorCounter').textContent = `${tr('visits')}: ${visits ?? (visits === null ? '…' : 'n/a')}`;
   }
 
-  document.querySelectorAll('.flag').forEach((b) => b.addEventListener('click', () => {
+  function setMenuOpen(open) {
+    $('langList').hidden = !open;
+    $('langBtn').setAttribute('aria-expanded', String(open));
+    if (open) (langItems.find((b) => b.dataset.lang === lang) || langItems[0]).focus();
+  }
+
+  $('langBtn').addEventListener('click', () => setMenuOpen($('langList').hidden));
+  langItems.forEach((b) => b.addEventListener('click', () => {
     lang = b.dataset.lang;
     try { localStorage.setItem('epiciclos-lang', lang); } catch (e) {}
     applyLang();
+    setMenuOpen(false);
+    $('langBtn').focus();
   }));
+  $('langList').addEventListener('keydown', (e) => {
+    const i = langItems.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); langItems[(i + 1) % langItems.length].focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); langItems[(i - 1 + langItems.length) % langItems.length].focus(); }
+    else if (e.key === 'Escape') { setMenuOpen(false); $('langBtn').focus(); }
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#langMenu')) setMenuOpen(false); });
 
   // Curve math
   function dedupe(p) {
