@@ -1,60 +1,61 @@
-<img src="assets/logo.svg" width="56" height="56" alt="Logo Epiciclos de Fourier" align="left">
+<img src="assets/logo.svg" width="56" height="56" alt="Fourier Epicycles logo" align="left">
 
-# Epiciclos de Fourier
+# Fourier Epicycles
 
 <br clear="left">
 
-Epiciclos de Fourier é uma ferramenta em HTML estático, num arquivo só, que transforma um desenho em uma soma de círculos girando (a série de Fourier discreta do contorno). Não tem backend, build nem chave de API: tudo roda no navegador, e a imagem que você abre não sai do seu computador.
+Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a sum of rotating circles (the discrete Fourier series of its outline). It has no backend, no build step and no API keys: everything runs client-side in the browser, and images you open never leave your machine. The interface is available in English and Portuguese.
 
-## Funcionalidades
+## Features
 
-- **Desenho à mão livre**: clique e arraste no quadro; ao soltar, o traço é fechado e a animação começa
-- **Contorno a partir de imagem**: abra ou arraste um PNG, JPG ou SVG; o contorno é extraído automaticamente, com limiar ajustável e opção de inverter as cores
-- **Exemplos prontos**: coração, estrela, trifólio e a letra π
-- **Número de termos**: de 1 a 300 círculos, com a porcentagem da energia do contorno que eles cobrem
-- **Coeficientes**: tabela com os 8 maiores coeficientes (frequência, módulo e fase)
-- **Visualização**: velocidade, círculos e contorno original podem ser ligados ou desligados
+- **Freehand drawing**: click and drag on the canvas; when you release, the stroke is closed and the animation starts
+- **Outline from an image**: open or drop a PNG, JPG or SVG; the outline is extracted automatically, with an adjustable threshold and an invert option
+- **Built-in examples**: heart, star, trefoil and the letter π
+- **Number of terms**: 1 to 300 circles, with the share of the outline's energy they cover
+- **Coefficient table**: the 8 largest coefficients (frequency, magnitude and phase)
+- **Display options**: speed, circles and original outline can each be toggled
+- **English / Portuguese**: picked from the browser language on first visit, switchable with the **PT / EN** button and remembered afterwards
 
-## Como usar
+## Usage
 
-1. Desenhe no quadro, abra uma imagem com **Abrir imagem** (ou arraste o arquivo para o quadro), ou escolha um item em **Exemplos**.
-2. Se for imagem, confira a miniatura no painel **Imagem**. Se o contorno sair errado, mexa no **Limiar** ou marque **Inverter cores**.
-3. Ajuste **Termos** para ver o desenho ganhar detalhe: com poucos círculos ele fica arredondado, com mais ele chega perto do original.
-4. Use **Pausar** para ver a curva completa com os termos escolhidos, **Recomeçar** para reiniciar a animação e **Limpar** para apagar tudo.
+1. Draw on the canvas, click **Open image** (or drop a file onto the canvas), or pick something from **Examples**.
+2. For images, check the preview in the **Image** panel. If the outline looks wrong, move the **Threshold** slider or tick **Invert colors**.
+3. Move **Terms** to watch the drawing gain detail: a few circles give a rounded shape, more circles get close to the original.
+4. **Pause** shows the full curve for the current number of terms, **Restart** resets the animation and **Clear** removes everything.
 
-## Como funciona
+## How it works
 
-1. O contorno é uma lista de pontos (x, y), e cada um vira um número complexo `z = x + iy`.
-2. A lista é refeita com 512 pontos à mesma distância um do outro, para que trechos desenhados devagar não pesem mais que os outros.
-3. A transformada discreta de Fourier dá um coeficiente para cada frequência:
+1. The outline is a list of (x, y) points, each treated as a complex number `z = x + iy`.
+2. The list is resampled to 512 points evenly spaced along its length, so parts drawn slowly don't weigh more than the rest.
+3. The discrete Fourier transform gives one coefficient per frequency:
 
    ```
    c_n = (1/N) · Σ z_k · e^(−2πi·n·k/N)
    ```
 
-4. Cada `c_n` é um círculo: o módulo é o raio, o argumento é o ângulo de partida e `n` é o número de voltas por ciclo (negativo gira no sentido contrário).
-5. Os círculos são ordenados do maior para o menor e somados. A ponta do último desenha a curva:
+4. Each `c_n` is a circle: its magnitude is the radius, its argument is the starting angle, and `n` is how many turns it makes per cycle (negative values spin the other way).
+5. The circles are sorted from largest to smallest and added tip to tail. The tip of the last one draws the curve:
 
    ```
-   z(t) = Σ c_n · e^(2πi·n·t),  t de 0 a 1
+   z(t) = Σ c_n · e^(2πi·n·t),  t from 0 to 1
    ```
 
-A porcentagem de energia é a soma de `|c_n|²` dos termos usados dividida pela soma de todos.
+The energy percentage is the sum of `|c_n|²` over the terms in use divided by the sum over all terms.
 
-Para imagens, o arquivo é reduzido, convertido para tons de cinza e separado em forma e fundo (o limiar inicial vem do método de Otsu). Depois a maior região conectada é escolhida e a borda dela é percorrida pixel a pixel (Moore neighbor tracing). Essa borda vira a lista de pontos do passo 1.
+For images, the file is downscaled, converted to grayscale and split into shape and background (the initial threshold comes from Otsu's method). The largest connected region is kept and its border is walked pixel by pixel (Moore neighbor tracing). That border becomes the point list in step 1.
 
-## Notas e limitações
+## Notes and limitations
 
-- Só a borda externa é usada: um "O" vira um disco, sem o furo.
-- Se a imagem tiver várias formas separadas, só a maior entra.
-- A DFT é a versão direta, O(N²). Com 512 pontos isso leva poucos milissegundos, então não usei FFT.
-- Nada é salvo: ao recarregar a página, o desenho se perde.
-- O contador de visitas no rodapé usa o [abacus.jasoncameron.dev](https://abacus.jasoncameron.dev), um serviço público sem chave e sem garantia. Se ele não responder, aparece "n/a".
+- Only the outer border is used: an "O" becomes a filled disc, without the hole.
+- If an image has several separate shapes, only the largest one is used.
+- The DFT is the direct O(N²) version. With 512 points it takes a few milliseconds, so there is no FFT.
+- Nothing is saved: reloading the page clears the drawing.
+- The visitor counter in the status bar uses [abacus.jasoncameron.dev](https://abacus.jasoncameron.dev), a public service with no key and no SLA. If it doesn't respond, the counter shows "n/a".
 
 ## Stack
 
-JavaScript puro e Canvas. Sem frameworks, sem build, sem dependências.
+Vanilla JavaScript and Canvas. No frameworks, no build step, no dependencies.
 
-## Licença
+## License
 
 [MIT](LICENSE)
