@@ -4,7 +4,7 @@
 
 <br clear="left">
 
-Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a sum of rotating circles (the discrete Fourier series of its outline). It has no backend, no build step and no API keys: everything runs client-side in the browser, and images you open never leave your machine. The interface is available in English and Portuguese.
+Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a sum of rotating circles (the discrete Fourier series of its outline). It has no backend, no build step and no API keys: everything runs client-side in the browser, and images you open never leave your machine. The interface is available in English, Brazilian Portuguese and Spanish (Spain).
 
 ## Features
 
@@ -14,7 +14,7 @@ Fourier Epicycles is a single-file, static HTML tool that turns a drawing into a
 - **Number of terms**: 1 to 300 circles, with the share of the outline's energy they cover
 - **Coefficient table**: the 8 largest coefficients (frequency, magnitude and phase)
 - **Display options**: speed, circles and original outline can each be toggled
-- **English / Portuguese**: picked from the browser language on first visit, switchable with the **PT / EN** button and remembered afterwards
+- **Three languages**: English (US), Portuguese (Brazil) and Spanish (Spain), picked from the browser language on first visit, switchable with the flag buttons in the top bar and remembered afterwards
 
 ## Usage
 
